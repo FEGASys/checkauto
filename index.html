@@ -1,0 +1,617 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#F3F1EC">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="CheckAuto">
+<link rel="apple-touch-icon" href="logo.png">
+<link rel="icon" href="logo.png">
+<title>CheckAuto — Checklist de Revisão</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600&family=Barlow:wght@400;500;600;700&display=swap">
+<style>
+  :root{
+    --ground:#F3F1EC;
+    --panel:#FFFFFF;
+    --panel-2:#FAF8F4;
+    --ink:#16181C;
+    --ink-2:#4A4F58;
+    --ink-3:#7C828D;
+    --line:#DCD7CC;
+    --line-2:#EAE6DD;
+    --gold:#A8781F;
+    --gold-soft:#F0E3C6;
+    --ok:#25664A;
+    --ok-soft:#DCEDE3;
+    --done:#8A4A16;
+    --done-soft:#F7E5D4;
+    --erro:#9B2226;
+    color-scheme:light;
+  }
+
+  *{box-sizing:border-box;}
+  html{-webkit-text-size-adjust:100%;}
+  body{
+    margin:0; background:var(--ground); color:var(--ink);
+    font-family:Barlow, "Segoe UI", system-ui, sans-serif;
+    font-size:15px; line-height:1.45;
+    -webkit-font-smoothing:antialiased;
+  }
+  button{font:inherit; color:inherit;}
+  input{font:inherit;}
+  h1,h2,h3{font-family:Oswald, "Arial Narrow", sans-serif; font-weight:500; margin:0; letter-spacing:.02em;}
+
+  .shell{max-width:1080px; margin:0 auto; padding:0 20px 140px;}
+
+  .top{
+    display:flex; align-items:center; gap:18px; flex-wrap:wrap;
+    padding:20px 0 16px; border-bottom:2px solid var(--ink);
+  }
+  .top img{height:46px; width:auto; display:block;}
+  .top .titles{flex:1 1 240px; min-width:200px;}
+  .top h1{font-size:26px; line-height:1.05;}
+  .top .sub{font-size:12.5px; color:var(--ink-3); letter-spacing:.12em; text-transform:uppercase;}
+
+  .tabs{display:flex; gap:4px; background:var(--panel-2); border:1px solid var(--line); border-radius:2px; padding:3px;}
+  .tabs button{
+    background:none; border:0; padding:7px 16px; cursor:pointer; border-radius:1px;
+    font-family:Oswald, sans-serif; font-size:14px; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-2);
+  }
+  .tabs button[aria-selected="true"]{background:var(--ink); color:var(--ground);}
+  .tabs button:focus-visible{outline:2px solid var(--gold); outline-offset:1px;}
+
+  .veiculo{
+    display:grid; gap:1px; background:var(--line);
+    border:1px solid var(--line); margin-top:18px;
+    grid-template-columns:repeat(6, minmax(0,1fr));
+  }
+  .fld{background:var(--panel); padding:8px 11px 9px; display:flex; flex-direction:column; gap:2px;}
+  .fld label{font-size:10.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-3); font-weight:600;}
+  .fld input{border:0; background:none; padding:0; color:var(--ink); font-size:15px; font-weight:600; width:100%;}
+  .fld input:focus{outline:none;}
+  .fld:focus-within{background:var(--gold-soft);}
+  .fld.wide{grid-column:span 2;}
+
+  .bar{display:flex; align-items:center; gap:14px; margin:18px 0 6px; flex-wrap:wrap;}
+  .bar h2{font-size:19px;}
+  .meter{flex:1 1 160px; height:5px; background:var(--line-2); border-radius:99px; overflow:hidden; min-width:120px;}
+  .meter i{display:block; height:100%; background:var(--gold); width:0%; transition:width .25s ease;}
+  .count{font-size:13px; color:var(--ink-3); font-variant-numeric:tabular-nums;}
+
+  .grupo{margin-top:26px;}
+  .grupo h3{
+    font-size:15px; letter-spacing:.14em; text-transform:uppercase; color:var(--gold);
+    padding-bottom:7px; border-bottom:1px solid var(--line);
+  }
+  .linhas{border:1px solid var(--line); border-top:0; background:var(--panel);}
+  .linha{
+    display:grid; grid-template-columns:1fr 232px 1fr; align-items:center; gap:12px;
+    padding:7px 12px; border-bottom:1px solid var(--line-2);
+  }
+  .linha:last-child{border-bottom:0;}
+  .linha:nth-child(even){background:var(--panel-2);}
+  .linha .nome{font-size:14.5px;}
+  .seg{display:flex; gap:5px;}
+  .seg button{
+    flex:1; padding:5px 6px; cursor:pointer; background:var(--panel);
+    border:1px solid var(--line); border-radius:2px;
+    font-size:11.5px; letter-spacing:.04em; text-transform:uppercase; font-weight:600; color:var(--ink-3);
+    white-space:nowrap;
+  }
+  .seg button:hover{border-color:var(--ink-3);}
+  .seg button:focus-visible{outline:2px solid var(--gold); outline-offset:1px;}
+  .seg button[aria-pressed="true"][data-v="ok"]{background:var(--ok-soft); border-color:var(--ok); color:var(--ok);}
+  .seg button[aria-pressed="true"][data-v="feito"]{background:var(--done-soft); border-color:var(--done); color:var(--done);}
+  .obs{
+    border:0; border-bottom:1px dashed var(--line); background:none; color:var(--ink);
+    padding:3px 2px; font-size:13.5px; width:100%;
+  }
+  .obs:focus{outline:none; border-bottom-color:var(--gold);}
+
+  .acoes{
+    position:fixed; left:0; right:0; bottom:0; z-index:20;
+    background:var(--panel); border-top:1px solid var(--line);
+    box-shadow:0 -6px 24px -18px rgba(0,0,0,.5);
+  }
+  .acoes .in{
+    max-width:1080px; margin:0 auto; padding:11px 20px;
+    display:flex; align-items:center; gap:12px; flex-wrap:wrap;
+  }
+  .total{display:flex; align-items:center; gap:8px; margin-right:auto;}
+  .total label{font-size:10.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-3); font-weight:600;}
+  .total input{
+    width:120px; border:1px solid var(--line); background:var(--panel-2); color:var(--ink);
+    padding:6px 9px; border-radius:2px; font-weight:600; font-variant-numeric:tabular-nums;
+  }
+  .total input:focus{outline:2px solid var(--gold); outline-offset:-1px;}
+  .btn{
+    padding:9px 18px; cursor:pointer; border-radius:2px; border:1px solid var(--ink);
+    background:var(--panel); font-family:Oswald, sans-serif; font-size:14px;
+    letter-spacing:.07em; text-transform:uppercase;
+  }
+  .btn:hover{background:var(--panel-2);}
+  .btn.primary{background:var(--ink); color:var(--ground); border-color:var(--ink);}
+  .btn.primary:hover{opacity:.88;}
+  .btn.ghost{border-color:var(--line); color:var(--ink-2);}
+  .btn:focus-visible{outline:2px solid var(--gold); outline-offset:2px;}
+  .status{font-size:13px; color:var(--ink-3); min-width:90px;}
+  .status.ok{color:var(--ok);}
+  .status.erro{color:var(--erro);}
+
+  .busca{display:flex; gap:10px; align-items:center; margin:20px 0 14px; flex-wrap:wrap;}
+  .busca input{
+    flex:1 1 220px; padding:9px 12px; border:1px solid var(--line); background:var(--panel);
+    color:var(--ink); border-radius:2px; letter-spacing:.08em; text-transform:uppercase; font-weight:600;
+  }
+  .busca input:focus{outline:2px solid var(--gold); outline-offset:-1px;}
+  .cards{display:grid; gap:10px;}
+  .card{
+    display:grid; grid-template-columns:112px 1fr auto; gap:14px; align-items:center;
+    background:var(--panel); border:1px solid var(--line); border-left:3px solid var(--gold);
+    padding:12px 14px;
+  }
+  .card .placa{font-family:Oswald, sans-serif; font-size:21px; letter-spacing:.09em;}
+  .card .meta{font-size:13px; color:var(--ink-2);}
+  .card .meta b{color:var(--ink); font-weight:600;}
+  .card .quando{font-size:12px; color:var(--ink-3); font-variant-numeric:tabular-nums;}
+  .card .acts{display:flex; gap:7px;}
+  .card .acts button{padding:6px 12px; font-size:12.5px;}
+  .vazio{
+    border:1px dashed var(--line); padding:30px 20px; text-align:center; color:var(--ink-3);
+    background:var(--panel-2);
+  }
+  [hidden]{display:none !important;}
+
+  /* ================= CELULAR ================= */
+  @media (max-width:760px){
+    body{font-size:16px;}
+    .shell{padding:0 13px 190px;}
+    .top{padding:12px 0 10px; gap:12px;}
+    .top img{height:34px;}
+    .top .titles{flex:1 1 auto; min-width:0;}
+    .top h1{font-size:20px;}
+    .top .sub{display:none;}
+    .tabs{flex:1 1 100%; padding:3px;}
+    .tabs button{flex:1; padding:10px 8px; font-size:15px;}
+
+    .veiculo{grid-template-columns:repeat(2, minmax(0,1fr)); margin-top:14px;}
+    .fld{padding:9px 11px 10px;}
+    .fld input{font-size:16px;}
+    .fld.wide{grid-column:span 2;}
+
+    .bar{margin:20px 0 4px;}
+    .bar h2{font-size:18px; flex:1 1 auto;}
+    .count{width:100%; order:3;}
+
+    .grupo{margin-top:20px;}
+    .grupo h3{position:sticky; top:0; z-index:10; background:var(--ground); padding-top:9px; font-size:13.5px;}
+    .linha{grid-template-columns:1fr; gap:9px; padding:13px 12px; border-bottom:1px solid var(--line);}
+    .linha .nome{font-size:16px; font-weight:600;}
+    .seg{gap:8px;}
+    .seg button{min-height:46px; font-size:13px; border-radius:3px;}
+    .obs{font-size:16px; padding:7px 2px;}
+
+    .acoes .in{
+      padding:10px 13px calc(10px + env(safe-area-inset-bottom, 0px));
+      display:grid; grid-template-columns:1fr 1fr; gap:9px;
+    }
+    .total{grid-column:span 2; margin-right:0;}
+    .total input{flex:1; width:auto; padding:10px; font-size:16px;}
+    .status{grid-column:span 2; min-width:0; text-align:center; margin:-3px 0 1px;}
+    #btnNovo{grid-column:span 2;}
+    .btn{padding:13px 10px; font-size:15px; width:100%;}
+
+    .busca input{font-size:16px; padding:12px;}
+    .card{grid-template-columns:1fr; gap:8px;}
+    .card .acts button{flex:1; padding:11px; font-size:14px;}
+  }
+
+  #sheet{display:none;}
+  @media print{
+    @page{size:A4 portrait; margin:10mm 12mm 8mm;}
+    body{background:#fff; color:#111;}
+    .shell, .acoes{display:none !important;}
+    #sheet{display:block; font-family:Barlow, Arial, sans-serif; color:#111; font-size:8.6pt;}
+    #sheet header{display:flex; align-items:center; justify-content:space-between; gap:10mm;}
+    #sheet header img{width:40mm;}
+    #sheet header h1{font-family:Oswald, sans-serif; font-size:19pt; margin:0; text-align:right; color:#111;}
+    #sheet table{width:100%; border-collapse:collapse; table-layout:fixed;}
+    #sheet .ident{margin-top:3mm;}
+    #sheet .ident td{border:.5pt solid #999; padding:1.5mm 2mm;}
+    #sheet .ident td.l{background:#eee; font-size:7.5pt; font-weight:700; width:20mm; text-transform:uppercase; letter-spacing:.04em;}
+    #sheet h2{font-family:Oswald, sans-serif; font-size:10.5pt; margin:3.4mm 0 1.2mm; letter-spacing:.1em;}
+    #sheet .chk th{background:#1b1d22; color:#fff; font-size:7pt; padding:1.4mm 1mm; border:.5pt solid #1b1d22; letter-spacing:.03em;}
+    #sheet .chk td{border:.5pt solid #999; padding:1.05mm 2mm;}
+    #sheet .chk tbody tr:nth-child(even) td{background:#f4f4f1;}
+    #sheet .c{text-align:center; font-size:10pt; line-height:1;}
+    #sheet .sign td{padding-top:8mm; text-align:center; font-size:7.5pt;}
+    #sheet .sign span{border-bottom:.6pt solid #111; display:inline-block; width:46mm; margin-bottom:1.2mm;}
+  }
+</style>
+</head>
+<body>
+
+<div class="shell">
+  <div class="top">
+    <img src="logo.png" alt="">
+    <div class="titles">
+      <h1>Checklist de revisão</h1>
+      <div class="sub">Preparação para revenda</div>
+    </div>
+    <div class="tabs" role="tablist">
+      <button id="tabForm" role="tab" aria-selected="true">Checklist</button>
+      <button id="tabHist" role="tab" aria-selected="false">Histórico</button>
+    </div>
+  </div>
+
+  <section id="viewForm">
+    <div class="veiculo">
+      <div class="fld wide"><label for="f_modelo">Marca / Modelo</label><input id="f_modelo" data-f="modelo" placeholder="Ex.: Onix 1.0 LT"></div>
+      <div class="fld"><label for="f_ano">Ano</label><input id="f_ano" data-f="ano" placeholder="2019/2020"></div>
+      <div class="fld"><label for="f_placa">Placa</label><input id="f_placa" data-f="placa" placeholder="ABC1D23" style="text-transform:uppercase"></div>
+      <div class="fld"><label for="f_km">KM</label><input id="f_km" data-f="km" inputmode="numeric" placeholder="78.400"></div>
+      <div class="fld"><label for="f_data">Data</label><input id="f_data" data-f="data" type="date"></div>
+      <div class="fld wide"><label for="f_resp">Responsável</label><input id="f_resp" data-f="responsavel" placeholder="Mecânico / oficina"></div>
+      <div class="fld wide"><label for="f_conf">Conferente</label><input id="f_conf" data-f="conferente" placeholder="Quem conferiu"></div>
+      <div class="fld wide"><label for="f_os">Nº da OS</label><input id="f_os" data-f="os" placeholder="Opcional"></div>
+    </div>
+
+    <div class="bar">
+      <h2>Itens da revisão</h2>
+      <div class="meter"><i id="meterFill"></i></div>
+      <div class="count" id="counter">0 marcados</div>
+    </div>
+
+    <div id="grupos"></div>
+  </section>
+
+  <section id="viewHist" hidden>
+    <div class="busca">
+      <input id="filtro" placeholder="Buscar por placa ou modelo">
+      <button class="btn ghost" id="btnLimparFiltro">Limpar</button>
+    </div>
+    <div class="cards" id="lista"></div>
+  </section>
+</div>
+
+<div class="acoes">
+  <div class="in">
+    <div class="total">
+      <label for="f_total">Total gasto R$</label>
+      <input id="f_total" data-f="total" inputmode="decimal" placeholder="0,00">
+    </div>
+    <span class="status" id="status"></span>
+    <button class="btn ghost" id="btnNovo">Novo</button>
+    <button class="btn" id="btnSalvar">Salvar</button>
+    <button class="btn primary" id="btnPdf">Gerar PDF</button>
+  </div>
+</div>
+
+<div id="sheet"></div>
+
+<script>
+(function(){
+  "use strict";
+
+  var GRUPOS = [
+    { titulo:"Motor e conjunto mecânico", itens:[
+      "Correia dentada + tensor e rolamentos",
+      "Bomba d'água",
+      "Correia Poli-V + tensor",
+      "Kit de embreagem (disco, platô, rolamento)",
+      "Bateria (teste de carga)",
+      "Alternador / motor de partida",
+      "Óleo do motor",
+      "Filtro de óleo",
+      "Filtro de ar do motor",
+      "Filtro de combustível",
+      "Filtro de ar-condicionado (cabine)",
+      "Velas de ignição",
+      "Cabos de vela / bobina",
+      "Bicos injetores (limpeza)",
+      "Coxins do motor e do câmbio",
+      "Radiador, ventoinha e mangueiras",
+      "Fluido de arrefecimento",
+      "Vazamentos (juntas e retentores)",
+      "Leitura de erros no scanner"
+    ]},
+    { titulo:"Suspensão, direção e rodas", itens:[
+      "Amortecedores dianteiros",
+      "Amortecedores traseiros",
+      "Kit batente e coifa",
+      "Molas",
+      "Bandejas / braços da suspensão",
+      "Buchas da bandeja",
+      "Pivôs",
+      "Bieletas (links)",
+      "Barra estabilizadora e buchas",
+      "Terminais de direção",
+      "Caixa de direção (folga / vazamento)",
+      "Rolamentos de roda",
+      "Pastilhas e discos de freio",
+      "Pneus (4) e estepe",
+      "Alinhamento",
+      "Balanceamento",
+      "Macaco, chave de roda e triângulo"
+    ]}
+  ];
+
+  var TOTAL_ITENS = GRUPOS.reduce(function(n,g){ return n + g.itens.length; }, 0);
+  var CAMPOS = ["modelo","ano","placa","km","data","responsavel","conferente","os","total"];
+  var API = "api/revisoes";
+
+  var estado = novoEstado();
+  var cacheHist = [];
+
+  function novoEstado(){
+    var h = new Date();
+    return { id:null, modelo:"", ano:"", placa:"", km:"",
+             data:h.getFullYear()+"-"+pad(h.getMonth()+1)+"-"+pad(h.getDate()),
+             responsavel:"", conferente:"", os:"", total:"", itens:{} };
+  }
+  function pad(n){ return (n<10?"0":"") + n; }
+  function chave(gi, ii){ return gi + "-" + ii; }
+  function esc(s){
+    return String(s == null ? "" : s).replace(/[&<>"]/g, function(c){
+      return { "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;" }[c];
+    });
+  }
+
+  /* ---------- montagem ---------- */
+  var elGrupos = document.getElementById("grupos");
+  GRUPOS.forEach(function(g, gi){
+    var sec = document.createElement("div");
+    sec.className = "grupo";
+    var h = document.createElement("h3");
+    h.textContent = g.titulo;
+    var box = document.createElement("div");
+    box.className = "linhas";
+    g.itens.forEach(function(nome, ii){
+      var k = chave(gi, ii);
+      var row = document.createElement("div");
+      row.className = "linha";
+      row.innerHTML =
+        '<div class="nome">' + esc(nome) + '</div>' +
+        '<div class="seg">' +
+          '<button type="button" data-k="' + k + '" data-v="ok" aria-pressed="false">Não precisou</button>' +
+          '<button type="button" data-k="' + k + '" data-v="feito" aria-pressed="false">Feito / trocado</button>' +
+        '</div>' +
+        '<input class="obs" data-k="' + k + '" placeholder="Observação / marca da peça" aria-label="Observação de ' + esc(nome) + '">';
+      box.appendChild(row);
+    });
+    sec.appendChild(h); sec.appendChild(box); elGrupos.appendChild(sec);
+  });
+
+  elGrupos.addEventListener("click", function(ev){
+    var b = ev.target.closest("button[data-k]");
+    if(!b) return;
+    var k = b.getAttribute("data-k"), v = b.getAttribute("data-v");
+    var cur = estado.itens[k] || {};
+    cur.status = (cur.status === v) ? "" : v;
+    estado.itens[k] = cur;
+    pintar(); marcarSujo();
+  });
+  elGrupos.addEventListener("input", function(ev){
+    var i = ev.target.closest("input.obs");
+    if(!i) return;
+    var k = i.getAttribute("data-k");
+    estado.itens[k] = estado.itens[k] || {};
+    estado.itens[k].obs = i.value;
+    marcarSujo();
+  });
+
+  CAMPOS.forEach(function(f){
+    var el = document.querySelector('[data-f="' + f + '"]');
+    if(!el) return;
+    el.addEventListener("input", function(){
+      estado[f] = (f === "placa") ? el.value.toUpperCase() : el.value;
+      marcarSujo();
+    });
+  });
+
+  function pintar(){
+    var n = 0;
+    document.querySelectorAll(".seg button[data-k]").forEach(function(b){
+      var st = (estado.itens[b.getAttribute("data-k")] || {}).status || "";
+      b.setAttribute("aria-pressed", String(st === b.getAttribute("data-v")));
+    });
+    document.querySelectorAll("input.obs").forEach(function(i){
+      i.value = (estado.itens[i.getAttribute("data-k")] || {}).obs || "";
+    });
+    Object.keys(estado.itens).forEach(function(k){
+      if(estado.itens[k] && estado.itens[k].status) n++;
+    });
+    CAMPOS.forEach(function(f){
+      var el = document.querySelector('[data-f="' + f + '"]');
+      if(el && el.value !== (estado[f] || "")) el.value = estado[f] || "";
+    });
+    document.getElementById("counter").textContent = n + " de " + TOTAL_ITENS + " marcados";
+    document.getElementById("meterFill").style.width = Math.round(n / TOTAL_ITENS * 100) + "%";
+  }
+
+  var elStatus = document.getElementById("status");
+  function marcarSujo(){ elStatus.className = "status"; elStatus.textContent = "Não salvo"; }
+  function dizer(msg, tipo){ elStatus.className = "status" + (tipo ? " " + tipo : ""); elStatus.textContent = msg; }
+
+  /* ---------- folha de impressão ---------- */
+  function dataBr(iso){
+    if(!iso || iso.length < 10) return iso || "";
+    return iso.slice(8,10) + "/" + iso.slice(5,7) + "/" + iso.slice(0,4);
+  }
+  function montarSheet(){
+    var tabelas = GRUPOS.map(function(g, gi){
+      var linhas = g.itens.map(function(nome, ii){
+        var it = estado.itens[chave(gi, ii)] || {};
+        return '<tr><td>' + esc(nome) + '</td>' +
+               '<td class="c">' + (it.status === "ok" ? "☑" : "☐") + '</td>' +
+               '<td class="c">' + (it.status === "feito" ? "☑" : "☐") + '</td>' +
+               '<td>' + esc(it.obs || "") + '</td></tr>';
+      }).join("");
+      return '<h2>' + esc(g.titulo.toUpperCase()) + '</h2>' +
+        '<table class="chk"><colgroup><col style="width:40%"><col style="width:13%">' +
+        '<col style="width:12%"><col style="width:35%"></colgroup>' +
+        '<thead><tr><th>ITEM</th><th>NÃO PRECISOU</th><th>FEITO / TROCADO</th><th>OBSERVAÇÃO / PEÇA</th></tr></thead>' +
+        '<tbody>' + linhas + '</tbody></table>';
+    }).join("");
+
+    document.getElementById("sheet").innerHTML =
+      '<header><img src="logo.png" alt=""><h1>CHECKLIST REVISÃO</h1></header>' +
+      '<table class="ident"><tr>' +
+        '<td class="l">Marca / Modelo</td><td>' + esc(estado.modelo) + '</td>' +
+        '<td class="l">Ano</td><td>' + esc(estado.ano) + '</td>' +
+        '<td class="l">Placa</td><td>' + esc(estado.placa) + '</td>' +
+      '</tr><tr>' +
+        '<td class="l">KM atual</td><td>' + esc(estado.km) + '</td>' +
+        '<td class="l">Data</td><td>' + esc(dataBr(estado.data)) + '</td>' +
+        '<td class="l">Responsável</td><td>' + esc(estado.responsavel) + '</td>' +
+      '</tr></table>' + tabelas +
+      '<table class="sign"><tr>' +
+        '<td><span></span><br>' + (estado.responsavel ? esc(estado.responsavel) : "Mecânico responsável") + '</td>' +
+        '<td><span></span><br>' + (estado.conferente ? esc(estado.conferente) : "Conferente") + '</td>' +
+        '<td><span></span><br>Total gasto R$ ' + esc(estado.total) + '</td>' +
+      '</tr></table>';
+  }
+  window.addEventListener("beforeprint", montarSheet);
+  document.getElementById("btnPdf").addEventListener("click", function(){
+    montarSheet(); window.print();
+  });
+
+  document.getElementById("btnNovo").addEventListener("click", function(){
+    if(elStatus.textContent === "Não salvo" &&
+       !confirm("As alterações não salvas serão perdidas. Começar um checklist novo?")) return;
+    estado = novoEstado(); pintar(); dizer("");
+    window.scrollTo({ top:0, behavior:"smooth" });
+  });
+
+  /* ---------- servidor ---------- */
+  document.getElementById("btnSalvar").addEventListener("click", salvar);
+
+  function salvar(){
+    if(!estado.placa.trim()){
+      alert("Informe a placa do veículo para salvar.");
+      document.getElementById("f_placa").focus();
+      return;
+    }
+    dizer("Salvando…");
+    fetch(API, {
+      method:"POST",
+      headers:{ "Content-Type":"application/json" },
+      body: JSON.stringify(estado)
+    }).then(function(r){
+      if(!r.ok) throw new Error("HTTP " + r.status);
+      return r.json();
+    }).then(function(reg){
+      estado.id = reg.id;
+      dizer("Salvo no servidor", "ok");
+      carregarHistorico();
+    }).catch(function(){
+      dizer("Não salvou — sem conexão", "erro");
+      alert("Não foi possível salvar. Confira a internet e tente de novo — o que está na tela não se perdeu.");
+    });
+  }
+
+  function carregarHistorico(){
+    return fetch(API).then(function(r){ return r.json(); }).then(function(lista){
+      cacheHist = Array.isArray(lista) ? lista : [];
+      desenharLista();
+    }).catch(function(){ desenharLista(); });
+  }
+
+  var elLista = document.getElementById("lista");
+  var elFiltro = document.getElementById("filtro");
+  elFiltro.addEventListener("input", desenharLista);
+  document.getElementById("btnLimparFiltro").addEventListener("click", function(){
+    elFiltro.value = ""; desenharLista(); elFiltro.focus();
+  });
+
+  function desenharLista(){
+    var q = elFiltro.value.trim().toLowerCase();
+    var itens = cacheHist.filter(function(r){
+      if(!q) return true;
+      return ((r.placa||"") + " " + (r.modelo||"")).toLowerCase().indexOf(q) >= 0;
+    });
+    if(!itens.length){
+      elLista.innerHTML = '<div class="vazio">' +
+        (cacheHist.length ? "Nenhum veículo encontrado para essa busca."
+                          : "Nenhuma revisão salva ainda. Preencha o checklist e toque em Salvar.") + '</div>';
+      return;
+    }
+    elLista.innerHTML = itens.map(function(r){
+      var n = 0, feitos = 0;
+      for(var k in (r.itens||{})){
+        var st = r.itens[k] && r.itens[k].status;
+        if(st) n++;
+        if(st === "feito") feitos++;
+      }
+      var quando = r.atualizadoEm ? new Date(r.atualizadoEm).toLocaleString("pt-BR") : "";
+      return '<div class="card">' +
+        '<div class="placa">' + esc(r.placa || "—") + '</div>' +
+        '<div>' +
+          '<div class="meta"><b>' + esc(r.modelo || "Modelo não informado") + '</b> · ' +
+            esc(r.ano || "") + ' · ' + esc(r.km ? r.km + " km" : "") + '</div>' +
+          '<div class="meta">' + n + ' itens marcados · ' + feitos + ' trocados · Total R$ ' + esc(r.total || "0,00") + '</div>' +
+          '<div class="quando">' + esc(quando) + '</div>' +
+        '</div>' +
+        '<div class="acts">' +
+          '<button class="btn ghost" data-abrir="' + esc(r.id) + '">Abrir</button>' +
+          '<button class="btn" data-imprimir="' + esc(r.id) + '">PDF</button>' +
+          '<button class="btn ghost" data-excluir="' + esc(r.id) + '" title="Excluir">✕</button>' +
+        '</div>' +
+      '</div>';
+    }).join("");
+  }
+
+  elLista.addEventListener("click", function(ev){
+    var b = ev.target.closest("button[data-abrir], button[data-imprimir], button[data-excluir]");
+    if(!b) return;
+    var id = b.getAttribute("data-abrir") || b.getAttribute("data-imprimir") || b.getAttribute("data-excluir");
+    var reg = cacheHist.filter(function(r){ return r.id === id; })[0];
+    if(!reg) return;
+
+    if(b.hasAttribute("data-excluir")){
+      if(!confirm("Excluir a revisão da placa " + (reg.placa || "") + "? Isso não tem volta.")) return;
+      fetch(API + "/" + encodeURIComponent(id), { method:"DELETE" })
+        .then(carregarHistorico)
+        .catch(function(){ alert("Não foi possível excluir agora."); });
+      return;
+    }
+
+    estado = {
+      id: reg.id, modelo: reg.modelo || "", ano: reg.ano || "", placa: reg.placa || "",
+      km: reg.km || "", data: reg.data || "", responsavel: reg.responsavel || "",
+      conferente: reg.conferente || "", os: reg.os || "", total: reg.total || "",
+      itens: reg.itens || {}
+    };
+    pintar();
+    dizer("Carregado do histórico", "ok");
+    if(b.hasAttribute("data-imprimir")){
+      montarSheet(); window.print();
+    } else {
+      mostrar("form");
+      window.scrollTo({ top:0, behavior:"smooth" });
+    }
+  });
+
+  /* ---------- abas ---------- */
+  var tabForm = document.getElementById("tabForm");
+  var tabHist = document.getElementById("tabHist");
+  function mostrar(qual){
+    var form = qual === "form";
+    tabForm.setAttribute("aria-selected", String(form));
+    tabHist.setAttribute("aria-selected", String(!form));
+    document.getElementById("viewForm").hidden = !form;
+    document.getElementById("viewHist").hidden = form;
+  }
+  tabForm.addEventListener("click", function(){ mostrar("form"); });
+  tabHist.addEventListener("click", function(){ mostrar("hist"); carregarHistorico(); });
+
+  pintar();
+  carregarHistorico();
+})();
+</script>
+</body>
+</html>
