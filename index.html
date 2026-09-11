@@ -212,24 +212,30 @@
 
   #sheet{display:none;}
   @media print{
-    @page{size:A4 portrait; margin:10mm 12mm 8mm;}
-    body{background:#fff; color:#111;}
+    @page{size:A4 portrait; margin:8mm 10mm 6mm;}
+    html, body{background:#fff; color:#111;}
     .shell, .acoes{display:none !important;}
-    #sheet{display:block; font-family:Barlow, Arial, sans-serif; color:#111; font-size:8.6pt;}
-    #sheet header{display:flex; align-items:center; justify-content:space-between; gap:10mm;}
-    #sheet header img{width:40mm;}
-    #sheet header h1{font-family:Oswald, sans-serif; font-size:19pt; margin:0; text-align:right; color:#111;}
-    #sheet table{width:100%; border-collapse:collapse; table-layout:fixed;}
-    #sheet .ident{margin-top:3mm;}
-    #sheet .ident td{border:.5pt solid #999; padding:1.5mm 2mm;}
-    #sheet .ident td.l{background:#eee; font-size:7.5pt; font-weight:700; width:20mm; text-transform:uppercase; letter-spacing:.04em;}
-    #sheet h2{font-family:Oswald, sans-serif; font-size:10.5pt; margin:3.4mm 0 1.2mm; letter-spacing:.1em;}
-    #sheet .chk th{background:#1b1d22; color:#fff; font-size:7pt; padding:1.4mm 1mm; border:.5pt solid #1b1d22; letter-spacing:.03em;}
-    #sheet .chk td{border:.5pt solid #999; padding:1.05mm 2mm;}
+    #sheet{
+      display:block; font-family:Barlow, Arial, sans-serif; color:#111;
+      font-size:7.8pt; line-height:1.2;
+      -webkit-print-color-adjust:exact; print-color-adjust:exact;
+    }
+    #sheet header{display:flex; align-items:center; justify-content:space-between; gap:8mm;}
+    #sheet header img{width:33mm;}
+    #sheet header h1{font-family:Oswald, sans-serif; font-size:16pt; margin:0; text-align:right; color:#111;}
+    #sheet table{width:100%; border-collapse:collapse; table-layout:fixed; page-break-inside:avoid;}
+    #sheet tr, #sheet td, #sheet th{page-break-inside:avoid;}
+    #sheet .ident{margin-top:2.4mm;}
+    #sheet .ident td{border:.4pt solid #999; padding:1.1mm 1.6mm;}
+    #sheet .ident td.l{background:#ececec; font-size:6.6pt; font-weight:700; width:19mm; text-transform:uppercase; letter-spacing:.03em;}
+    #sheet h2{font-family:Oswald, sans-serif; font-size:9.5pt; margin:2.6mm 0 .9mm; letter-spacing:.09em;}
+    #sheet .chk th{background:#1b1d22; color:#fff; font-size:6.3pt; padding:1mm .8mm; border:.4pt solid #1b1d22; letter-spacing:.02em;}
+    #sheet .chk td{border:.4pt solid #999; padding:.75mm 1.6mm; font-size:7.6pt;}
     #sheet .chk tbody tr:nth-child(even) td{background:#f4f4f1;}
-    #sheet .c{text-align:center; font-size:10pt; line-height:1;}
-    #sheet .sign td{padding-top:8mm; text-align:center; font-size:7.5pt;}
-    #sheet .sign span{border-bottom:.6pt solid #111; display:inline-block; width:46mm; margin-bottom:1.2mm;}
+    #sheet .c{text-align:center; font-size:9pt; line-height:1;}
+    #sheet .sign{margin-top:1mm;}
+    #sheet .sign td{padding-top:6mm; text-align:center; font-size:7pt;}
+    #sheet .sign span{border-bottom:.5pt solid #111; display:inline-block; width:42mm; margin-bottom:1mm;}
   }
 </style>
 </head>
